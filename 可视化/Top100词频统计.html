@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh" style="height: 100%">
+<head>
+  <meta charset="utf-8">
+  <title>电影短评Top100词频统计</title>
+  <style>
+    .container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding: 20px;
+    }
+    .tags-container {
+      margin-bottom: 30px;
+      padding: 15px;
+      border: 1px solid #eee;
+      border-radius: 5px;
+      background-color: #fafafa;
+      text-align: center;
+      line-height: 2.2;
+    }
+    .pie-container {
+      height: 450px;
+      margin-top: 20px;
+    }
+    .word-tag {
+      display: inline-block;
+      margin: 5px;
+      padding: 6px 12px;
+      border-radius: 4px;
+      color: white;
+      font-size: 14px;
+    }
+    .slider-container {
+      margin: 20px 0;
+    }
+    #wordCount {
+      width: 50px;
+      display: inline-block;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+  </style>
+</head>
+<body style="height: 100%; margin: 0">
+  <div class="container">
+    <h1>电影短评Top<span id="wordCountTitle">100</span>词频统计</h1>
+    
+    <div class="slider-container" style="text-align: center;">
+      <label for="wordSlider">显示词数量: <span id="wordCount">100</span></label>
+      <input type="range" id="wordSlider" min="5" max="100" step="5" value="100">
+    </div>
+    
+    <div class="tags-container" id="tagsContainer">
+      <!-- 词标签将在这里动态生成 -->
+    </div>
+    
+    <div id="pieChart" class="pie-container"></div>
+  </div>
+
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <script type="text/javascript">
+    // 初始化数据
+    var allData = [{"name": "\u7535\u5f71", "value": 2857}, {"name": "\u6ca1\u6709", "value": 1488}, {"name": "\u8fd8\u662f", "value": 1365}, {"name": "\u6545\u4e8b", "value": 1239}, {"name": "\u5c31\u662f", "value": 1189}, {"name": "\u771f\u7684", "value": 1086}, {"name": "\u6700\u540e", "value": 1082}, {"name": "\u4e0d\u662f", "value": 916}, {"name": "\u4e00\u90e8", "value": 834}, {"name": "\u559c\u6b22", "value": 775}, {"name": "\u4ec0\u4e48", "value": 770}, {"name": "\u5267\u60c5", "value": 728}, {"name": "\u6211\u4eec", "value": 723}, {"name": "\u5bfc\u6f14", "value": 720}, {"name": "\u8fd9\u90e8", "value": 693}, {"name": "\u89c9\u5f97", "value": 667}, {"name": "\u611f\u89c9", "value": 612}, {"name": "\u770b\u5230", "value": 593}, {"name": "\u8fd9\u79cd", "value": 589}, {"name": "\u89d2\u8272", "value": 586}, {"name": "\u975e\u5e38", "value": 584}, {"name": "\u5973\u6027", "value": 566}, {"name": "\u4e16\u754c", "value": 560}, {"name": "\u8fd9\u4e48", "value": 558}, {"name": "\u89c2\u4f17", "value": 507}, {"name": "\u6709\u70b9", "value": 486}, {"name": "\u65f6\u5019", "value": 476}, {"name": "\u77e5\u9053", "value": 475}, {"name": "\u4eba\u7269", "value": 470}, {"name": "\u5df2\u7ecf", "value": 456}, {"name": "\u5b8c\u5168", "value": 453}, {"name": "\u4e00\u6837", "value": 445}, {"name": "\u5f71\u7247", "value": 439}, {"name": "\u5176\u5b9e", "value": 439}, {"name": "\u8fd8\u6709", "value": 435}, {"name": "\u597d\u770b", "value": 431}, {"name": "\u751f\u6d3b", "value": 423}, {"name": "\u867d\u7136", "value": 422}, {"name": "\u90a3\u4e48", "value": 421}, {"name": "\u53ea\u662f", "value": 408}, {"name": "\u5f88\u591a", "value": 401}, {"name": "\u53ef\u80fd", "value": 388}, {"name": "\u600e\u4e48", "value": 386}, {"name": "\u4ed6\u4eec", "value": 385}, {"name": "\u7247\u5b50", "value": 379}, {"name": "\u7ed3\u5c3e", "value": 367}, {"name": "\u5982\u679c", "value": 359}, {"name": "\u51fa\u6765", "value": 348}, {"name": "\u4e3a\u4e86", "value": 346}, {"name": "\u4e0d\u8fc7", "value": 345}, {"name": "\u4e0d\u9519", "value": 341}, {"name": "\u53ea\u6709", "value": 337}, {"name": "\u4eba\u751f", "value": 337}, {"name": "\u73b0\u5b9e", "value": 332}, {"name": "\u751a\u81f3", "value": 329}, {"name": "\u4e0d\u80fd", "value": 328}, {"name": "\u4e3a\u4ec0\u4e48", "value": 326}, {"name": "\u6f14\u5458", "value": 318}, {"name": "\u7231\u60c5", "value": 318}, {"name": "\u5f00\u59cb", "value": 315}, {"name": "\u4f5c\u4e3a", "value": 313}, {"name": "\u4ee5\u53ca", "value": 311}, {"name": "\u4e24\u4e2a", "value": 309}, {"name": "\u52a8\u753b", "value": 309}, {"name": "\u95ee\u9898", "value": 308}, {"name": "\u4e00\u76f4", "value": 304}, {"name": "\u4e00\u4e9b", "value": 303}, {"name": "\u53d9\u4e8b", "value": 301}, {"name": "\u7ecf\u5178", "value": 300}, {"name": "\u9700\u8981", "value": 298}, {"name": "\u8868\u6f14", "value": 298}, {"name": "\u5e94\u8be5", "value": 297}, {"name": "\u6240\u6709", "value": 292}, {"name": "\u955c\u5934", "value": 292}, {"name": "\u4f5c\u54c1", "value": 292}, {"name": "\u5982\u6b64", "value": 284}, {"name": "\u559c\u5267", "value": 284}, {"name": "\u73b0\u5728", "value": 283}, {"name": "\u5b69\u5b50", "value": 281}, {"name": "\u4e00\u70b9", "value": 280}, {"name": "\u5e0c\u671b", "value": 280}, {"name": "\u6210\u4e3a", "value": 280}, {"name": "\u5267\u672c", "value": 277}, {"name": "\u5973\u4e3b", "value": 275}, {"name": "\u90e8\u5206", "value": 273}, {"name": "\u60c5\u611f", "value": 270}, {"name": "\u771f\u662f", "value": 269}, {"name": "\u90a3\u4e9b", "value": 267}, {"name": "\u52a8\u4f5c", "value": 267}, {"name": "\u4e2d\u56fd", "value": 266}, {"name": "\u4e0d\u4f1a", "value": 266}, {"name": "\u6709\u4e9b", "value": 263}, {"name": "\u60c5\u8282", "value": 263}, {"name": "\u7b2c\u4e00\u90e8", "value": 262}, {"name": "\u771f\u6b63", "value": 259}, {"name": "\u8fd9\u662f", "value": 257}, {"name": "\u4e00\u5207", "value": 254}, {"name": "\u611f\u52a8", "value": 251}, {"name": "\u771f\u5b9e", "value": 250}, {"name": "\u672c\u7247", "value": 249}];
+    var currentData = allData.slice(0, 100); // 默认显示设定数量
+    
+    // 定义颜色数组
+    var colors = [
+      '#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de',
+      '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc', '#1e90ff',
+      '#32cd32', '#ff4500', '#9370db', '#40e0d0', '#ff6347',
+      '#7b68ee', '#00fa9a', '#ffd700', '#6495ed', '#ff69b4',
+      '#3cb371', '#ff7f50', '#4169e1', '#ff1493', '#00bfff',
+      '#adff2f', '#da70d6', '#cd5c5c', '#20b2aa', '#ff8c00'
+    ];
+    
+    // 初始化饼图
+    var pieDom = document.getElementById('pieChart');
+    var pieChart = echarts.init(pieDom);
+    
+    // 更新饼图函数
+    function updatePieChart() {
+      var option = {
+        title: {
+          text: '电影短评词频分析',
+          subtext: '显示前' + currentData.length + '个高频词汇',
+          left: 'center'
+        },
+        tooltip: {
+          trigger: 'item',
+          formatter: '{b}: {c} ({d}%)'
+        },
+        series: [
+          {
+            name: '词频统计',
+            type: 'pie',
+            radius: '60%',
+            center: ['50%', '55%'],
+            data: currentData,
+            emphasis: {
+              itemStyle: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: 'rgba(0, 0, 0, 0.5)'
+              }
+            },
+            label: {
+              formatter: '{b}\n{c} 次'
+            }
+          }
+        ]
+      };
+      
+      pieChart.setOption(option, true);
+    }
+    
+    // 更新词标签
+    function updateWordTags() {
+      var tagsContainer = document.getElementById('tagsContainer');
+      
+      // 按词频排序
+      var sortedData = [...currentData].sort((a, b) => b.value - a.value);
+      
+      // 生成HTML
+      var html = '';
+      
+      sortedData.forEach(function(item, index) {
+        var colorIndex = index % colors.length;
+        html += '<span class="word-tag" style="background-color:' + 
+                colors[colorIndex] + ';">' + 
+                item.name + ' (' + item.value + ')</span>';
+      });
+      
+      tagsContainer.innerHTML = html;
+    }
+    
+    // 初始加载
+    updatePieChart();
+    updateWordTags();
+    
+    // 添加事件监听器
+    var wordSlider = document.getElementById('wordSlider');
+    var wordCount = document.getElementById('wordCount');
+    var wordCountTitle = document.getElementById('wordCountTitle');
+    
+    wordSlider.addEventListener('input', function() {
+      var count = parseInt(this.value);
+      wordCount.textContent = count;
+      wordCountTitle.textContent = count;
+      currentData = allData.slice(0, count);
+      updatePieChart();
+      updateWordTags();
+    });
+    
+    // 窗口调整大小时重绘图表
+    window.addEventListener('resize', function() {
+      pieChart.resize();
+    });
+  </script>
+</body>
+</html>
